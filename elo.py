@@ -11,7 +11,6 @@ class ELOPlayer:
 
 
 class ELOMatch:
-
     def __init__(self, players: List[ELOPlayer] = []):
         self.players = players
 
@@ -21,16 +20,11 @@ class ELOMatch:
     def calc_new_elos(self):
         n = len(self.players)
         K = 32
-        player_pairs = list(permutations(range(n), 2))
+        avg_rating = sum([player.elo for player in self.players])/n
         elo_changes = defaultdict(float)
-        for i, j in player_pairs:
-            E = 1.0 / (1.0 + 10.0 ** ((self.players[j].elo - self.players[i].elo) / 400))
-            # if self.players[j].place == self.players[i].place:
-            #     S = 0.5
-            # else:
-            #     S = float(self.players[i].place > self.players[j].place)
-            S = float(self.players[i].place == 10)
-
+        for i in range(n):
+            E = 1.0 / (1.0 + 10.0 ** ((avg_rating - self.players[i].elo) / 400)) * (2 / n)
+            S = float(self.players[i].place == 10) # Works for Catan only
             elo_changes[i] += K * (S - E)
 
         for i in range(n):
